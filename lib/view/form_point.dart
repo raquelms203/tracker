@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:tracker/database/tracker_database.dart';
 import 'package:tracker/model/point.dart';
+import 'package:tracker/view/form_sample.dart';
 import 'package:tracker/widgets/button_custom.dart';
 import 'package:tracker/widgets/container_loading.dart';
 import 'package:tracker/widgets/textfield_decoration.dart';
@@ -72,7 +73,7 @@ class _FormPointState extends State<FormPoint> {
                           },
                         ),
                         SizedBox(
-                          height: 20,
+                          height: 30,
                         ),
                         defaultButton(
                             onPressed: () async {
@@ -95,11 +96,15 @@ class _FormPointState extends State<FormPoint> {
       loading = true;
     });
     int dateNow = DateTime.now().millisecondsSinceEpoch;
-    await databaseHelper.addPoint(Point(
+    Point point = Point(
         code: code.text,
         createdAt: dateNow,
         updatedAt: dateNow,
         x: location.longitude,
-        y: location.latitude));
+        y: location.latitude);
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => FormSample(point: point)));
   }
 }

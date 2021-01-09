@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:tracker/model/point.dart';
+import 'package:tracker/model/sample.dart';
 
 class TrackerDatabase {
   static TrackerDatabase _databaseHelper;
@@ -77,12 +78,18 @@ class TrackerDatabase {
     return result;
   }
 
-  Future<int> addPoint(Point point) async {
+  Future<String> addPoint(Point point) async {
     print(point.pointToJson().values);
     Database db = await this.getDatabase();
     var result = await db.insert(_tablePoints, point.pointToJson());
-    print(result);
-    return result;
+    return result.toString();
+  }
+
+  Future<String> addSample(Sample sample) async {
+    print(sample.sampleToJson().values);
+    Database db = await this.getDatabase();
+    var result = await db.insert(_tableSamples, sample.sampleToJson());
+    return result.toString();
   }
 // Future<int> atualizarDisciplina(Disciplina disciplina, {String nomeAntigo}) async {
 //     var db = await this.getDatabase();

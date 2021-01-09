@@ -27,7 +27,7 @@ class Sample {
         value: json["value"] as double);
   }
 
-  Map<String, dynamic> sampleToJson(Sample sample) {
+  Map<String, dynamic> sampleToJson() {
     Map<String, dynamic> map = Map<String, dynamic>();
 
     if (id != null) map["id"] = id;
