@@ -11,7 +11,7 @@ import 'package:tracker/widgets/container_loading.dart';
 class MapsView extends StatefulWidget {
   final LocationData location;
 
-  MapsView({this.location});
+  MapsView(this.location);
 
   @override
   _MapsViewState createState() => _MapsViewState();

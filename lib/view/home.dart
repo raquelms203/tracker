@@ -40,9 +40,9 @@ class _HomeState extends State<Home> {
             body: TabBarView(
               physics: NeverScrollableScrollPhysics(),
               children: [
-                PointsView(),
+                PointsView(_locationData),
                 MapsView(
-                  location: _locationData,
+                 _locationData,
                 )
               ],
             )));

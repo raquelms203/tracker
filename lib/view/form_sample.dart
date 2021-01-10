@@ -11,8 +11,10 @@ import 'package:tracker/widgets/textfield_decoration.dart';
 
 class FormSample extends StatefulWidget {
   final Point point;
+  final String idPoint;
+  final bool fromMaps;
 
-  FormSample({this.point});
+  FormSample({this.point, this.fromMaps, this.idPoint});
 
   @override
   _FormSampleState createState() => _FormSampleState();
@@ -95,30 +97,34 @@ class _FormSampleState extends State<FormSample> {
 
   Future<void> submitSample() async {
     if (!_formKey.currentState.validate()) return;
+    String idPoint;
     setState(() {
       loading = true;
     });
     int dateNow = DateTime.now().millisecondsSinceEpoch;
 
-    String idPoint = await databaseHelper.addPoint(widget.point);
+    if (widget.idPoint == null)
+      idPoint = await databaseHelper.addPoint(widget.point);
 
     Sample sample = Sample(
         createdAt: dateNow,
         date: dateSelected.millisecondsSinceEpoch,
-        idPoint: idPoint,
+        idPoint: widget.idPoint == null ? idPoint : widget.idPoint,
         parameter: parameter.text,
         updatedAt: dateNow,
         value: double.parse(value.text));
 
     await databaseHelper.addSample(sample);
-    trackerBloc.addMark();
+    if (widget.idPoint == null) trackerBloc.addMark();
 
     setState(() {
       loading = false;
     });
-
-    Navigator.pop(context);
-    Navigator.pop(context);
+    if (widget.idPoint == null) {
+      Navigator.pop(context);
+      Navigator.pop(context);
+    } else
+      Navigator.pop(context, true);
   }
 
   Widget calendarField() {

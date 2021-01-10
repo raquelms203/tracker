@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:tracker/database/tracker_database.dart';
 import 'package:tracker/model/point.dart';
 import 'package:tracker/util/functions.dart';
+import 'package:tracker/view/form_point.dart';
 import 'package:tracker/view/points_details.dart';
 import 'package:tracker/widgets/container_loading.dart';
 
 class PointsView extends StatefulWidget {
+  final LocationData location;
+
+  PointsView(this.location);
+
   @override
   _PointsViewState createState() => _PointsViewState();
 }
@@ -15,24 +22,42 @@ class _PointsViewState extends State<PointsView> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: FutureBuilder<List<Point>>(
-        future: trackerDatabase.getPoints(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            if (snapshot.data.isNotEmpty)
-              return Column(
-                children: snapshot.data.map((item) => cardPoint(item)).toList(),
-              );
-            else
-              return Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: Text("Não há pontos registrados.",
-                    textAlign: TextAlign.center),
-              );
-          } else
-            return containerLoading();
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Text(
+          "+",
+          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
+        ),
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => FormPoint(
+                        location: LatLng(widget.location.latitude,
+                            widget.location.longitude),
+                      )));
         },
+      ),
+      body: SingleChildScrollView(
+        child: FutureBuilder<List<Point>>(
+          future: trackerDatabase.getPoints(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data.isNotEmpty)
+                return Column(
+                  children:
+                      snapshot.data.map((item) => cardPoint(item)).toList(),
+                );
+              else
+                return Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Text("Não há pontos registrados.",
+                      textAlign: TextAlign.center),
+                );
+            } else
+              return containerLoading();
+          },
+        ),
       ),
     );
   }
@@ -52,7 +77,7 @@ class _PointsViewState extends State<PointsView> {
                     child: ListTile(
                       title: Text("ID: ${item.id} | Código: ${item.code}"),
                       subtitle: Text(
-                          "${snapshot.data} ${snapshot.data.length == 1 ? "coleta" : "coletas"}"),
+                          "${snapshot.data} ${snapshot.data == "1" ? "coleta" : "coletas"}"),
                       trailing: Text(updatedDate),
                       leading: Icon(
                         Icons.location_on,
@@ -61,11 +86,15 @@ class _PointsViewState extends State<PointsView> {
                       ),
                     ),
                   )),
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                bool result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => PointsDetails(item)));
+                if (result) {
+                  await trackerDatabase.getPoints();
+                  setState(() {});
+                }
               },
             );
           } else

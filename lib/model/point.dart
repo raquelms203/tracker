@@ -1,8 +1,8 @@
 class Point {
   final String id;
   final String code;
-  final double x;
-  final double y;
+  double x;
+  double y;
   final int updatedAt;
   final int createdAt;
 

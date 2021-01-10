@@ -19,7 +19,7 @@ Widget defaultButton({Color color, String text, Function onPressed}) {
 Widget outlinedButton({Color color, String text, Function onPressed}) {
   return InkWell(
     child: Container(  
-      height: 50,
+      height: 35,
       alignment: Alignment.center,
       decoration: BoxDecoration(  
         color: Colors.white,
