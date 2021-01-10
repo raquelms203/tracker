@@ -72,10 +72,27 @@ class TrackerDatabase {
     ''');
   }
 
-  Future<List<Map<String, dynamic>>> getPoints() async {
+  Future<List<Point>> getPoints() async {
     Database db = await this.getDatabase();
     List<Map> result = await db.rawQuery('SELECT * FROM $_tablePoints');
-    return result;
+    return result.map<Point>((item) => Point.fromJson(item)).toList();
+  }
+
+  Future<List<Sample>> getSamplesById(String idPoint) async {
+    Database db = await this.getDatabase();
+    int id = int.parse(idPoint);
+    List<Map> result = await db.rawQuery(
+        'SELECT * FROM $_tableSamples WHERE id_point = ?', [id]);
+    return result.map<Sample>((item) => Sample.fromJson(item)).toList();
+  }
+
+  Future<String> getSamplesCountById(String idPoint) async {
+    Database db = await this.getDatabase();
+    int id = int.parse(idPoint);
+    List<Map> result = await db.rawQuery(
+        'SELECT COUNT (*) FROM $_tableSamples WHERE id_point = ?', [id]);
+    int count = Sqflite.firstIntValue(result);
+    return count.toString();
   }
 
   Future<String> addPoint(Point point) async {

@@ -19,16 +19,20 @@ class MapsView extends StatefulWidget {
 
 class _MapsViewState extends State<MapsView> {
   final trackerBloc = BlocProvider.getBloc<TrackerBloc>();
-  Set<Marker> _markers = HashSet<Marker>();
+
+  @override
+  void initState() {
+    trackerBloc.fetchMarkers();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    print(widget.location);
     return widget.location != null
         ? StreamBuilder<HashSet<Marker>>(
             stream: trackerBloc.markers,
             builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.none) {
+              if (snapshot.hasData) {
                 return GoogleMap(
                     initialCameraPosition: CameraPosition(
                         target: LatLng(widget.location.latitude,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:tracker/view/maps_view.dart';
+import 'package:tracker/view/points_view.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -39,9 +40,7 @@ class _HomeState extends State<Home> {
             body: TabBarView(
               physics: NeverScrollableScrollPhysics(),
               children: [
-                Container(
-                  color: Colors.green,
-                ),
+                PointsView(),
                 MapsView(
                   location: _locationData,
                 )

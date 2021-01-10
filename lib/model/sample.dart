@@ -18,8 +18,8 @@ class Sample {
 
   factory Sample.fromJson(Map<String, dynamic> json) {
     return Sample(
-        id: json["id"],
-        idPoint: json["id_point"],
+        id: json["id"].toString(),
+        idPoint: json["id_point"].toString(),
         date: json["date"] as int,
         createdAt: json["created_at"] as int,
         updatedAt: json["updated_at"] as int,

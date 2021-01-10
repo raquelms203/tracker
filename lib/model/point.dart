@@ -17,7 +17,7 @@ class Point {
 
   factory Point.fromJson(Map<String, dynamic> json) {
     return Point(
-      id: json["id"],
+      id: json["id"].toString(),
       code: json["code"],
       x: json["x"] as double,
       y: json["y"] as double,

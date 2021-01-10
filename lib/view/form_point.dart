@@ -102,9 +102,12 @@ class _FormPointState extends State<FormPoint> {
         updatedAt: dateNow,
         x: location.longitude,
         y: location.latitude);
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => FormSample(point: point)));
+
+    setState(() {
+      loading = false;
+    });
+    
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => FormSample(point: point)));
   }
 }

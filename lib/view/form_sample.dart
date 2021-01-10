@@ -1,6 +1,6 @@
+import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+import 'package:tracker/bloc/tracker_bloc.dart';
 import 'package:tracker/database/tracker_database.dart';
 import 'package:tracker/model/point.dart';
 import 'package:tracker/model/sample.dart';
@@ -20,9 +20,10 @@ class FormSample extends StatefulWidget {
 
 class _FormSampleState extends State<FormSample> {
   final _formKey = GlobalKey<FormState>();
-  final TrackerDatabase databaseHelper = TrackerDatabase();
-  final TextEditingController parameter = TextEditingController();
-  final TextEditingController value = TextEditingController();
+  final trackerBloc = BlocProvider.getBloc<TrackerBloc>();
+  final databaseHelper = TrackerDatabase();
+  final parameter = TextEditingController();
+  final value = TextEditingController();
   DateTime dateSelected = DateTime.now();
   bool loading = false;
 
@@ -110,7 +111,14 @@ class _FormSampleState extends State<FormSample> {
         value: double.parse(value.text));
 
     await databaseHelper.addSample(sample);
-    
+    trackerBloc.addMark();
+
+    setState(() {
+      loading = false;
+    });
+
+    Navigator.pop(context);
+    Navigator.pop(context);
   }
 
   Widget calendarField() {
