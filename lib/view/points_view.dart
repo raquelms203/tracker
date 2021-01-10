@@ -58,9 +58,10 @@ class _PointsViewState extends State<PointsView> {
                       snapshot.data.map((item) => cardPoint(item)).toList(),
                 );
               else
-                return Padding(
+                return Container(
+                  alignment: Alignment.center,
                   padding: const EdgeInsets.only(top: 20.0),
-                  child: Text("Não há pontos registrados.",
+                  child: Text("Não há pontos registrados",
                       textAlign: TextAlign.center),
                 );
             } else
