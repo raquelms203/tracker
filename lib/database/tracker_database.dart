@@ -83,7 +83,6 @@ class TrackerDatabase {
     int id = int.parse(idPoint);
     List<Map> result =
         await db.rawQuery('SELECT * FROM $_tablePoints WHERE id = ?', [id]);
-    print("RESULT" + result.toString());
     return Point.fromJson(result.first);
   }
 
@@ -113,14 +112,12 @@ class TrackerDatabase {
   }
 
   Future<String> addPoint(Point point) async {
-    print(point.pointToJson().values);
     Database db = await this.getDatabase();
     var result = await db.insert(_tablePoints, point.pointToJson());
     return result.toString();
   }
 
   Future<String> addSample(Sample sample) async {
-    print(sample.sampleToJson().values);
     Database db = await this.getDatabase();
     var result = await db.insert(_tableSamples, sample.sampleToJson());
     return result.toString();
@@ -136,7 +133,6 @@ class TrackerDatabase {
   }
 
   Future<int> updateSample(Sample sample) async {
-    print(sample.sampleToJson().toString());
     int id = int.parse(sample.id);
     var db = await this.getDatabase();
     var result = await db.update(_tableSamples, sample.sampleToJson(),

@@ -50,7 +50,6 @@ class TrackerBloc extends BlocBase {
   void addMark() {
     var list = markers.value;
     Marker marker = markerSelected.value;
-    print(marker);
     list.add(marker);
     markers.sink.add(null);
     markers.sink.add(list);

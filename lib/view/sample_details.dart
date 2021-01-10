@@ -2,14 +2,10 @@ import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
 import 'package:tracker/bloc/tracker_bloc.dart';
 import 'package:tracker/database/tracker_database.dart';
-import 'package:tracker/model/point.dart';
 import 'package:tracker/model/sample.dart';
 import 'package:tracker/util/functions.dart';
-import 'package:tracker/view/form_point.dart';
 import 'package:tracker/view/form_sample.dart';
-import 'package:tracker/widgets/container_loading.dart';
 import 'package:tracker/widgets/dialog_custom.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SampleDetails extends StatefulWidget {
   final Sample sample;
@@ -97,7 +93,6 @@ class _SampleDetailsState extends State<SampleDetails> {
                           FormSample(idPoint: sample.idPoint, sample: sample)));
               if (result != null && result) {
                 var s = await trackerDatabase.getSamplesById(sample.id);
-                print(s.value.toString());
                 setState(() {
                   sample = s;
                 });
