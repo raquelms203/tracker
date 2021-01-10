@@ -19,12 +19,23 @@ class TrackerBloc extends BlocBase {
       for (Point item in databaseMarkers) {
         String markerId = functions.generateRandomString(5);
         list.add(Marker(
-            markerId: MarkerId(markerId),
-            position: LatLng(item.y, item.x)));
+            markerId: MarkerId(markerId), position: LatLng(item.y, item.x)));
       }
       markers.sink.add(list);
     }
     return list;
+  }
+
+  Future updateMarkers() async {
+    markers.sink.add(null);
+    HashSet<Marker> list = HashSet<Marker>();
+    List databaseMarkers = await trackerDatabase.getPoints();
+    for (Point item in databaseMarkers) {
+      String markerId = functions.generateRandomString(5);
+      list.add(Marker(
+          markerId: MarkerId(markerId), position: LatLng(item.y, item.x)));
+    }
+    markers.sink.add(list);
   }
 
   void setMarkSelected(LatLng point) {

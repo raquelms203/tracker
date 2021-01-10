@@ -1,10 +1,13 @@
+import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
+import 'package:tracker/bloc/tracker_bloc.dart';
 import 'package:tracker/database/tracker_database.dart';
 import 'package:tracker/model/point.dart';
 import 'package:tracker/model/sample.dart';
 import 'package:tracker/util/functions.dart';
 import 'package:tracker/view/form_point.dart';
 import 'package:tracker/view/form_sample.dart';
+import 'package:tracker/view/sample_details.dart';
 import 'package:tracker/widgets/container_loading.dart';
 import 'package:tracker/widgets/dialog_custom.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +23,7 @@ class PointsDetails extends StatefulWidget {
 
 class _PointsDetailsState extends State<PointsDetails> {
   final trackerDatabase = TrackerDatabase();
+  final trackerBloc = BlocProvider.getBloc<TrackerBloc>();
   final GlobalKey<PopupMenuButtonState<int>> popupKey = GlobalKey();
 
   Point point;
@@ -103,8 +107,8 @@ class _PointsDetailsState extends State<PointsDetails> {
                             idPoint: point.id,
                             point: point,
                           )));
-              if (result) {
-                await trackerDatabase.getSamplesById(point.id);
+              if (result != null && result) {
+                await trackerDatabase.getSamplesByIdPoint(point.id);
                 setState(() {});
               }
             } else if (value == 2) {
@@ -115,7 +119,7 @@ class _PointsDetailsState extends State<PointsDetails> {
                             point: point,
                             isEdit: true,
                           )));
-              if (result) {
+              if (result != null && result) {
                 var p = await trackerDatabase.getPointById(point.id);
                 setState(() {
                   point = p;
@@ -126,6 +130,7 @@ class _PointsDetailsState extends State<PointsDetails> {
                   "Deseja apagar esse ponto e as coletas relacionadas?",
                   () async {
                 await trackerDatabase.deletePoint(point.id);
+                await trackerBloc.updateMarkers();
                 Navigator.pop(context);
                 Navigator.pop(context, true);
               });
@@ -205,37 +210,42 @@ class _PointsDetailsState extends State<PointsDetails> {
         ));
   }
 
+  Widget cardSample(Sample item) {
+    return Container(
+        height: 90,
+        child: Card(
+            child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(children: [
+                  Icon(Icons.account_tree_outlined,
+                      size: 40, color: Colors.indigo[300]),
+                  SizedBox(width: 20),
+                  Text("ID: ${item.id}\n" +
+                      "Data: ${dateFormatted(DateTime.fromMillisecondsSinceEpoch(item.date))}" +
+                      "\nParâmetro: ${item.parameter}" +
+                      "\nValor: ${item.value}", overflow: TextOverflow.ellipsis,),
+                ]))));
+  }
+
   Widget listSamples() {
     return FutureBuilder<List<Sample>>(
-        future: trackerDatabase.getSamplesById(point.id),
+        future: trackerDatabase.getSamplesByIdPoint(point.id),
         builder: (context, snapshot) {
           if (snapshot.hasData)
             return Column(
                 children: snapshot.data
-                    .map((item) => Container(
-                        height: 80,
-                        child: Card(
-                            child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Row(children: [
-                            Icon(Icons.account_tree_outlined,
-                                size: 40, color: Colors.indigo[300]),
-                            SizedBox(width: 20),
-                            Expanded(
-                              child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                        "ID: ${item.id}\nData: ${dateFormatted(DateTime.fromMillisecondsSinceEpoch(item.date))}"),
-                                    Text(
-                                      "Valor: ${item.value}\nParâmetro: ${item.parameter}",
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  ]),
-                            )
-                          ]),
-                        ))))
+                    .map((item) => InkWell(
+                        onTap: () async {
+                          bool result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SampleDetails(item)));
+                          if (result != null && result) {
+                            await trackerDatabase.getSamplesByIdPoint(point.id);
+                            setState(() {});
+                          }
+                        },
+                        child: cardSample(item)))
                     .toList());
           else
             return containerLoading();

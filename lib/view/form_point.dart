@@ -1,11 +1,11 @@
+import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:tracker/bloc/tracker_bloc.dart';
 import 'package:tracker/database/tracker_database.dart';
 import 'package:tracker/model/point.dart';
 import 'package:tracker/view/form_sample.dart';
-import 'package:tracker/view/points_details.dart';
-import 'package:tracker/view/points_view.dart';
 import 'package:tracker/widgets/button_custom.dart';
 import 'package:tracker/widgets/container_loading.dart';
 import 'package:tracker/widgets/textfield_decoration.dart';
@@ -24,6 +24,8 @@ class FormPoint extends StatefulWidget {
 class _FormPointState extends State<FormPoint> {
   final _formKey = GlobalKey<FormState>();
   final trackerDatabase = TrackerDatabase();
+  final trackerBloc = BlocProvider.getBloc<TrackerBloc>();
+
   final TrackerDatabase databaseHelper = TrackerDatabase();
   final TextEditingController code = TextEditingController();
   LatLng location;
@@ -142,6 +144,7 @@ class _FormPointState extends State<FormPoint> {
           x: point.x,
           y: point.y);
       await trackerDatabase.updatePoint(newPoint);
+      await trackerBloc.updateMarkers();
       setState(() {
         loading = false;
       });

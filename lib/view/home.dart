@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
               children: [
                 PointsView(_locationData),
                 MapsView(
-                 _locationData,
+                  _locationData,
                 )
               ],
             )));

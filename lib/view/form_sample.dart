@@ -13,8 +13,9 @@ class FormSample extends StatefulWidget {
   final Point point;
   final String idPoint;
   final bool fromMaps;
+  final Sample sample;
 
-  FormSample({this.point, this.fromMaps, this.idPoint});
+  FormSample({this.point, this.fromMaps, this.idPoint, this.sample});
 
   @override
   _FormSampleState createState() => _FormSampleState();
@@ -28,12 +29,26 @@ class _FormSampleState extends State<FormSample> {
   final value = TextEditingController();
   DateTime dateSelected = DateTime.now();
   bool loading = false;
+  bool isEdit = false;
+  Sample sample;
+
+  @override
+  void initState() {
+    if (widget.sample != null) {
+      sample = widget.sample;
+      isEdit = true;
+      parameter.text = sample.parameter;
+      value.text = sample.value.toString();
+      dateSelected = DateTime.fromMillisecondsSinceEpoch(sample.date);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cadastrar coleta"),
+        title: Text("${isEdit ? "Editar" : "Cadastrar"} coleta"),
       ),
       body: loading
           ? containerLoading()
@@ -97,34 +112,49 @@ class _FormSampleState extends State<FormSample> {
 
   Future<void> submitSample() async {
     if (!_formKey.currentState.validate()) return;
-    String idPoint;
+
     setState(() {
       loading = true;
     });
+
+    String idPoint;
+    Sample newSample;
     int dateNow = DateTime.now().millisecondsSinceEpoch;
 
-    if (widget.idPoint == null)
+    if (widget.idPoint == null) {
       idPoint = await databaseHelper.addPoint(widget.point);
+      trackerBloc.addMark();
+      await trackerBloc.updateMarkers();
+    }
 
-    Sample sample = Sample(
-        createdAt: dateNow,
-        date: dateSelected.millisecondsSinceEpoch,
-        idPoint: widget.idPoint == null ? idPoint : widget.idPoint,
-        parameter: parameter.text,
-        updatedAt: dateNow,
-        value: double.parse(value.text));
-
-    await databaseHelper.addSample(sample);
-    if (widget.idPoint == null) trackerBloc.addMark();
+    if (isEdit) {
+      newSample = Sample(
+          createdAt: sample.createdAt,
+          date: dateSelected.millisecondsSinceEpoch,
+          idPoint: sample.idPoint,
+          parameter: parameter.text,
+          updatedAt: dateNow,
+          id: sample.id,
+          value: double.parse(value.text));
+      await databaseHelper.updateSample(newSample);
+    } else {
+      newSample = Sample(
+          createdAt: dateNow,
+          date: dateSelected.millisecondsSinceEpoch,
+          idPoint: widget.idPoint == null ? idPoint : widget.idPoint,
+          parameter: parameter.text,
+          updatedAt: dateNow,
+          value: double.parse(value.text));
+      await databaseHelper.addSample(newSample);
+    }
 
     setState(() {
       loading = false;
     });
     if (widget.idPoint == null) {
       Navigator.pop(context);
-      Navigator.pop(context);
-    } else
-      Navigator.pop(context, true);
+    }
+    Navigator.pop(context, true);
   }
 
   Widget calendarField() {

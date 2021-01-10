@@ -1,11 +1,13 @@
+import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:tracker/bloc/tracker_bloc.dart';
 import 'package:tracker/database/tracker_database.dart';
 import 'package:tracker/model/point.dart';
 import 'package:tracker/util/functions.dart';
 import 'package:tracker/view/form_point.dart';
-import 'package:tracker/view/points_details.dart';
+import 'package:tracker/view/point_details.dart';
 import 'package:tracker/widgets/container_loading.dart';
 
 class PointsView extends StatefulWidget {
@@ -19,6 +21,7 @@ class PointsView extends StatefulWidget {
 
 class _PointsViewState extends State<PointsView> {
   final trackerDatabase = TrackerDatabase();
+  final trackerBloc = BlocProvider.getBloc<TrackerBloc>();
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +31,20 @@ class _PointsViewState extends State<PointsView> {
           "+",
           style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
         ),
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          trackerBloc.setMarkSelected(
+              LatLng(widget.location.latitude, widget.location.latitude));
+          bool result = await Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => FormPoint(
                         location: LatLng(widget.location.latitude,
                             widget.location.longitude),
                       )));
+          if (result != null && result) {
+            await trackerDatabase.getPoints();
+            setState(() {});
+          }
         },
       ),
       body: SingleChildScrollView(
@@ -66,7 +75,7 @@ class _PointsViewState extends State<PointsView> {
     String updatedDate =
         dateFormatted(DateTime.fromMillisecondsSinceEpoch(item.updatedAt));
 
-    return FutureBuilder<String>(
+    return FutureBuilder<int>(
         future: trackerDatabase.getSamplesCountById(item.id),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -77,7 +86,7 @@ class _PointsViewState extends State<PointsView> {
                     child: ListTile(
                       title: Text("ID: ${item.id} | Código: ${item.code}"),
                       subtitle: Text(
-                          "${snapshot.data} ${snapshot.data == "1" ? "coleta" : "coletas"}"),
+                          "${snapshot.data} ${snapshot.data == 1 ? "coleta" : "coletas"}"),
                       trailing: Text(updatedDate),
                       leading: Icon(
                         Icons.location_on,
@@ -91,7 +100,7 @@ class _PointsViewState extends State<PointsView> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => PointsDetails(item)));
-                if (result) {
+                if (result != null && result) {
                   await trackerDatabase.getPoints();
                   setState(() {});
                 }

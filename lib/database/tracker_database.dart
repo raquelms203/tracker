@@ -87,21 +87,29 @@ class TrackerDatabase {
     return Point.fromJson(result.first);
   }
 
-  Future<List<Sample>> getSamplesById(String idPoint) async {
+  Future<List<Sample>> getSamplesByIdPoint(String idPoint) async {
     Database db = await this.getDatabase();
     int id = int.parse(idPoint);
     List<Map> result = await db
-        .rawQuery('SELECT * FROM $_tableSamples WHERE id_point = ?', [id]);
+        .rawQuery('SELECT * FROM $_tableSamples WHERE $_colIdPoint = ?', [id]);
     return result.map<Sample>((item) => Sample.fromJson(item)).toList();
   }
 
-  Future<String> getSamplesCountById(String idPoint) async {
+  Future<Sample> getSamplesById(String idSample) async {
+    Database db = await this.getDatabase();
+    int id = int.parse(idSample);
+    List<Map> result = await db
+        .rawQuery('SELECT * FROM $_tableSamples WHERE $_colId = ?', [id]);
+    return Sample.fromJson(result.first);
+  }
+
+  Future<int> getSamplesCountById(String idPoint) async {
     Database db = await this.getDatabase();
     int id = int.parse(idPoint);
     List<Map> result = await db.rawQuery(
         'SELECT COUNT (*) FROM $_tableSamples WHERE id_point = ?', [id]);
     int count = Sqflite.firstIntValue(result);
-    return count.toString();
+    return count;
   }
 
   Future<String> addPoint(Point point) async {
@@ -124,7 +132,15 @@ class TrackerDatabase {
     var result = await db.update(_tablePoints, point.pointToJson(),
         where: '$_colId = ?', whereArgs: [id]);
 
-    print(result);
+    return result;
+  }
+
+  Future<int> updateSample(Sample sample) async {
+    print(sample.sampleToJson().toString());
+    int id = int.parse(sample.id);
+    var db = await this.getDatabase();
+    var result = await db.update(_tableSamples, sample.sampleToJson(),
+        where: '$_colId = ?', whereArgs: [id]);
     return result;
   }
 
@@ -136,6 +152,16 @@ class TrackerDatabase {
 
     int result = await db
         .rawDelete('DELETE FROM $_tableSamples WHERE $_colIdPoint = $id');
+    return result;
+  }
+
+  Future<int> deleteSample(String idSample) async {
+    int id = int.parse(idSample);
+    var db = await this.getDatabase();
+
+    int result =
+        await db.rawDelete('DELETE FROM $_tableSamples WHERE $_colId = $id');
+
     return result;
   }
 }
